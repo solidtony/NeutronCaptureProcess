@@ -1,0 +1,140 @@
+
+
+body, h1,h2,h3,h4,h5,h6 {
+    font-family: "Montserrat", sans-serif
+}
+
+.w3-row-padding img {
+    margin-bottom: 12px
+}
+
+.tilestext {
+    text-anchor:middle;
+    font-size: 24px;
+    fill: #565656;
+    stroke-width: 0.1px;
+}
+
+circle {
+    fill: steelblue;
+}
+
+.frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.content {
+    display: inline-block;
+    width: 45%;
+}
+
+.galaxy {
+    display: inline-block;
+    width: 55%;
+    float: right;
+}
+
+.atomicNumber{
+    text-anchor:start;
+    fill: #000;
+    stroke-width: 0.1px;
+    font-weight: bolder;
+}
+
+.atomicSymbol{
+    text-anchor:middle;
+    fill: #000;
+    stroke-width: 0.1px;
+    font-weight: bolder;
+}
+
+.selected{
+    fill: green;
+    stroke: black;
+    stroke-width:5;
+    r:25px;
+}
+
+/* Ptable tooltip classes*/
+.atomicName{
+    text-anchor:start;
+    text-font: 30;
+    fill: #565656;
+    stroke-width: 0.1px;
+}
+
+.d3-tip {
+    /*line-height: 5;*/
+    padding-left: 20px;
+    padding-right: 20px;
+    min-width: 20px;
+    border-style: groove;
+    background: #e6e6e6;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+/* Periodic table colors: start*/
+.BigBangFusion {
+    color: #828DAA;
+    fill: #828DAA;
+}
+
+.CosmicRayFission {
+    color: #08b400;
+    fill: #08b400;
+}
+
+.MergingNeutronStars {
+    color: #FF7C00;
+    fill: #FF7C00;
+}
+
+.ExplodingMassiveStars {
+    color: #0168a3;
+    fill:  #0168a3;
+}
+
+.DyingLowMassStars {
+    color: #c4006e;
+    fill: #c4006e;
+}
+
+.ExplodingWhiteDwarfs {
+    color: #d40000;
+    fill: #d40000;
+}
+
+.sProcess {
+    color: #040c51;
+    fill:  #040c51;
+}
+
+.rProcess {
+    color: #d40000;
+    fill:  #d40000;
+}
+/* Periodic table colors: end*/
+
+/* Axis color */
+.axisWhite line{
+  stroke: white;
+}
+
+.axisWhite path{
+  stroke: white;
+}
+
+.axisWhite text{
+  fill: white;
+}
+
+/* Brush selection */
+.unselected {
+  fill: #000;
+  fill-opacity: .125;
+  stroke: #fff;
+}
