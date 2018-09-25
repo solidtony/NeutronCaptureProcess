@@ -1,181 +1,147 @@
-class ScatterPlot
-{
+"use strict";
 
-    constructor (starData)
-    {
-    
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ScatterPlot = function () {
+    function ScatterPlot(starData) {
+        _classCallCheck(this, ScatterPlot);
+
         //Creating star data instance
         this.starData = starData;
 
         //Selects the div
-        let div = d3.select("#scatterPlt").classed("content", true);
+        var div = d3.select("#scatterPlt").classed("content", true);
 
         //Initializes the svg elements required for pTable chart
-        this.margin = {top: 30, right: 15, bottom: 30, left: 25};
-        let svgBounds = div.node().getBoundingClientRect();
+        this.margin = { top: 30, right: 15, bottom: 30, left: 25 };
+        var svgBounds = div.node().getBoundingClientRect();
         this.svgWidth = svgBounds.width - this.margin.left - this.margin.right;
-        this.svgHeight = this.svgWidth*0.55;
+        this.svgHeight = this.svgWidth * 0.55;
 
         //Adds svg to the div
-        this.svg = div.append("svg")
-            .attr("width", this.svgWidth)
-            .attr("height", this.svgHeight)
-            .attr("transform", "translate(0, 0)");
+        this.svg = div.append("svg").attr("width", this.svgWidth).attr("height", this.svgHeight).attr("transform", "translate(0, 0)");
 
         //Appends axis to svg
         this.svg.append("g").attr("id", "xAxis").attr("class", "axisWhite");
         this.svg.append("g").attr("id", "yAxis").attr("class", "axisWhite");
         this.svg.append("g").attr("id", "circs").attr("class", "axisWhite");
-
-    };
-
-    update(xSelected, ySelected, cSelected)
-    {
-        ///////
-        // Plotting scatter plot
-        
-        //Axis
-        let xbuffer = 55.5;
-        let ybuffer = 16;
-        let pad = 0.1;
-        let r = 2.5;
-
-        let d_time = 1000;
-
-        let xmax = d3.max(this.starData, d => parseFloat(d[xSelected]));
-        let xmin = d3.min(this.starData, d => parseFloat(d[xSelected]));
-        let ymax = d3.max(this.starData, d => parseFloat(d[ySelected]));
-        let ymin = d3.min(this.starData, d => parseFloat(d[ySelected]));
-        let cmax = d3.max(this.starData, d => parseFloat(d[cSelected]));
-        let cmin = d3.min(this.starData, d => parseFloat(d[cSelected]));
-        
-        //X scale
-        let xScale = d3.scaleLinear()
-            .domain([xmin, xmax])
-            .range([r+xbuffer, this.svgWidth - r]);
-        //Y scale
-        let yScale = d3.scaleLinear()
-            .domain([ymax, ymin])
-            .range([r, this.svgHeight - ybuffer - r]);
-        let cScale = d3.scaleLinear()
-            .domain([cmin, cmax])
-            .range(["#a21201", "#0ae4d3"])
-
-        //x-axis setup
-        let xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format(".2f"));
-        d3.select("#xAxis")
-            .attr("transform", "translate( 0, "+(this.svgHeight-ybuffer)+")")
-            .transition()
-            .duration(d_time)
-            .call(xAxis);
-        d3.select("#xAxis").selectAll("text");
-        //y-axis setup
-        let yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format(".2f"));
-        d3.select("#yAxis")
-            .attr("transform", "translate("+xbuffer+", 0)")
-            .transition()
-            .duration(d_time)
-            .call(yAxis);
-
-        //Plots data
-        let circs = d3.select("#circs")
-            .selectAll("circle")
-            .data(this.starData);
-
-        let circsNew = circs.enter()
-            .append("circle");
-        circs.exit().remove;
-        circs = circsNew.merge(circs);
-
-        circs.transition()
-            .duration(d_time)
-            .attr("cx", d =>
-            {
-                if( isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected])))
-                {
-                    return 0;
-                }
-                else
-                {
-                    return xScale(parseFloat(d[xSelected]));
-                }
-            })
-            .attr("cy", d =>
-            {
-                if( isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected])) )
-                {
-                    return 0;
-                }
-                else
-                {
-                    return yScale(parseFloat(d[ySelected]));
-                }
-            })
-            .attr("r", r)
-            .style("fill", d =>
-            {
-                if( isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected])) )
-                {
-                    return "black";
-                }
-                else{ return cScale(+d[cSelected]); }
-            });
-
-        //////
-        // Brush selection
-        this.svg.select("#brush").remove()
-        this.svg.append("g")
-            .attr("id", "brush")
-            .call(d3.brush().extent([[xbuffer, 0], [this.svgWidth, this.svgHeight - ybuffer]]).on("brush", brushed).on("end", brushended));
-
-        let self = this;
-        function brushed() 
-        {
-            let s = d3.event.selection,
-                x0 = s[0][0],
-                y0 = s[0][1],
-                dx = s[1][0] - x0,
-                dy = s[1][1] - y0;
-
-            self.svg.selectAll('circle')
-                .classed("unselected", d => 
-                {
-                    if (xScale(d[xSelected]) >= x0 && xScale(d[xSelected]) <= x0 + dx && yScale(d[ySelected]) >= y0 && yScale(d[ySelected]) <= y0 + dy)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                });
-                
-            d3.select("#GPlot").selectAll('circle')
-                .classed("unselected", d => 
-                {
-                    if (xScale(d[xSelected]) >= x0 && xScale(d[xSelected]) <= x0 + dx && yScale(d[ySelected]) >= y0 && yScale(d[ySelected]) <= y0 + dy)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                });
-        };
-
-        function brushended() 
-        {
-            if (!d3.event.selection)
-            {
-                self.svg.selectAll('circle')
-                .classed("unselected", false);
-
-                d3.select("#GPlot").selectAll('circle')
-                .classed("unselected", false);
-            }
-        }
-
     }
 
-}
+    _createClass(ScatterPlot, [{
+        key: "update",
+        value: function update(xSelected, ySelected, cSelected) {
+            ///////
+            // Plotting scatter plot
+
+            //Axis
+            var xbuffer = 55.5;
+            var ybuffer = 16;
+            var pad = 0.1;
+            var r = 2.5;
+
+            var d_time = 1000;
+
+            var xmax = d3.max(this.starData, function (d) {
+                return parseFloat(d[xSelected]);
+            });
+            var xmin = d3.min(this.starData, function (d) {
+                return parseFloat(d[xSelected]);
+            });
+            var ymax = d3.max(this.starData, function (d) {
+                return parseFloat(d[ySelected]);
+            });
+            var ymin = d3.min(this.starData, function (d) {
+                return parseFloat(d[ySelected]);
+            });
+            var cmax = d3.max(this.starData, function (d) {
+                return parseFloat(d[cSelected]);
+            });
+            var cmin = d3.min(this.starData, function (d) {
+                return parseFloat(d[cSelected]);
+            });
+
+            //X scale
+            var xScale = d3.scaleLinear().domain([xmin, xmax]).range([r + xbuffer, this.svgWidth - r]);
+            //Y scale
+            var yScale = d3.scaleLinear().domain([ymax, ymin]).range([r, this.svgHeight - ybuffer - r]);
+            var cScale = d3.scaleLinear().domain([cmin, cmax]).range(["#a21201", "#0ae4d3"]);
+
+            //x-axis setup
+            var xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format(".2f"));
+            d3.select("#xAxis").attr("transform", "translate( 0, " + (this.svgHeight - ybuffer) + ")").transition().duration(d_time).call(xAxis);
+            d3.select("#xAxis").selectAll("text");
+            //y-axis setup
+            var yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format(".2f"));
+            d3.select("#yAxis").attr("transform", "translate(" + xbuffer + ", 0)").transition().duration(d_time).call(yAxis);
+
+            //Plots data
+            var circs = d3.select("#circs").selectAll("circle").data(this.starData);
+
+            var circsNew = circs.enter().append("circle");
+            circs.exit().remove;
+            circs = circsNew.merge(circs);
+
+            circs.transition().duration(d_time).attr("cx", function (d) {
+                if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
+                    return 0;
+                } else {
+                    return xScale(parseFloat(d[xSelected]));
+                }
+            }).attr("cy", function (d) {
+                if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
+                    return 0;
+                } else {
+                    return yScale(parseFloat(d[ySelected]));
+                }
+            }).attr("r", r).style("fill", function (d) {
+                if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
+                    return "black";
+                } else {
+                    return cScale(+d[cSelected]);
+                }
+            });
+
+            //////
+            // Brush selection
+            this.svg.select("#brush").remove();
+            this.svg.append("g").attr("id", "brush").call(d3.brush().extent([[xbuffer, 0], [this.svgWidth, this.svgHeight - ybuffer]]).on("brush", brushed).on("end", brushended));
+
+            var self = this;
+            function brushed() {
+                var s = d3.event.selection,
+                    x0 = s[0][0],
+                    y0 = s[0][1],
+                    dx = s[1][0] - x0,
+                    dy = s[1][1] - y0;
+
+                self.svg.selectAll('circle').classed("unselected", function (d) {
+                    if (xScale(d[xSelected]) >= x0 && xScale(d[xSelected]) <= x0 + dx && yScale(d[ySelected]) >= y0 && yScale(d[ySelected]) <= y0 + dy) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
+
+                d3.select("#GPlot").selectAll('circle').classed("unselected", function (d) {
+                    if (xScale(d[xSelected]) >= x0 && xScale(d[xSelected]) <= x0 + dx && yScale(d[ySelected]) >= y0 && yScale(d[ySelected]) <= y0 + dy) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
+            };
+
+            function brushended() {
+                if (!d3.event.selection) {
+                    self.svg.selectAll('circle').classed("unselected", false);
+
+                    d3.select("#GPlot").selectAll('circle').classed("unselected", false);
+                }
+            }
+        }
+    }]);
+
+    return ScatterPlot;
+}();
