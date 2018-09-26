@@ -36,8 +36,16 @@ var ScatterPlot = function () {
             // Plotting scatter plot
 
             //Axis
+            let cbActive = document.getElementById("sp_checkbox").checked;
+
+            function y_data(d)
+            {
+                if( cbActive ){ return (parseFloat(d[ySelected]) - parseFloat(d[xSelected])); }
+                else { return parseFloat(d[ySelected]); }
+            }
+            
             var xbuffer = 55.5;
-            var ybuffer = 16;
+            var ybuffer = 20;
             var pad = 0.1;
             var r = 2.5;
 
@@ -49,12 +57,8 @@ var ScatterPlot = function () {
             var xmin = d3.min(this.starData, function (d) {
                 return parseFloat(d[xSelected]);
             });
-            var ymax = d3.max(this.starData, function (d) {
-                return parseFloat(d[ySelected]);
-            });
-            var ymin = d3.min(this.starData, function (d) {
-                return parseFloat(d[ySelected]);
-            });
+            var ymax = d3.max(this.starData, y_data);
+            var ymin = d3.min(this.starData, y_data);
             var cmax = d3.max(this.starData, function (d) {
                 return parseFloat(d[cSelected]);
             });
@@ -85,7 +89,7 @@ var ScatterPlot = function () {
 
             circs.transition().duration(d_time).attr("cx", function (d) {
                 if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
-                    return 0;
+                    return -2*r;
                 } else {
                     return xScale(parseFloat(d[xSelected]));
                 }
@@ -93,7 +97,7 @@ var ScatterPlot = function () {
                 if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
                     return 0;
                 } else {
-                    return yScale(parseFloat(d[ySelected]));
+                    return yScale(y_data(d));
                 }
             }).attr("r", r).style("fill", function (d) {
                 if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
@@ -117,7 +121,7 @@ var ScatterPlot = function () {
                     dy = s[1][1] - y0;
 
                 self.svg.selectAll('circle').classed("unselected", function (d) {
-                    if (xScale(d[xSelected]) >= x0 && xScale(d[xSelected]) <= x0 + dx && yScale(d[ySelected]) >= y0 && yScale(d[ySelected]) <= y0 + dy) {
+                    if (xScale(parseFloat(d[xSelected])) >= x0 && xScale(parseFloat(d[xSelected])) <= x0 + dx && yScale(y_data(d)) >= y0 && yScale(parseFloat(y_data(d))) <= y0 + dy) {
                         return false;
                     } else {
                         return true;
@@ -125,7 +129,7 @@ var ScatterPlot = function () {
                 });
 
                 d3.select("#GPlot").selectAll('circle').classed("unselected", function (d) {
-                    if (xScale(d[xSelected]) >= x0 && xScale(d[xSelected]) <= x0 + dx && yScale(d[ySelected]) >= y0 && yScale(d[ySelected]) <= y0 + dy) {
+                    if (xScale(parseFloat(d[xSelected])) >= x0 && xScale(parseFloat(d[xSelected])) <= x0 + dx && yScale(parseFloat(y_data(d))) >= y0 && yScale(parseFloat(y_data(d))) <= y0 + dy) {
                         return false;
                     } else {
                         return true;

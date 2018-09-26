@@ -24,5 +24,5 @@ function chooseSelection()
     let xActive = document.getElementById("xselect").value;
     let yActive = document.getElementById("yselect").value;
     let cActive = document.getElementById("cselect").value;
-    this.SPlot.update(xActive, yActive, cActive)
+    this.SPlot.update(xActive, yActive, cActive);
 }

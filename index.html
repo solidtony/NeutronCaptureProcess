@@ -6,7 +6,7 @@
     <title>Visualizing the Neutron Capture Process</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="public/css/style.css"/>
-    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="bower_components/d3/d3.js"></script>
     <script type="text/javascript" src="bower_components/d3-tip/index.js"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
@@ -123,13 +123,22 @@
                 <option value="Ir">[Ir/Fe]</option>
             </select>
         </div>
+        <div>
+            <input type="checkbox" id="sp_checkbox" onchange="chooseSelection()">
+            <label>Check to plot y-axis = x-axis - y-axis. Intended for plotting [A/B] vs [B/Fe].
+        </div>
     <div id="SPlot" class = "view"></div>
-
     </div>
 
     <div class="w3-content w3-justify w3-text-grey" style="margin-top: 100px">
         <h2 id="about" class="w3-text-light-grey">About</h2>
         <hr style="width:200px" class="w3-opacity">
+        <h1>Check-Box</h1>
+        <p>[Y/X] = log(Y/X)_star - log(Y/X)_sun,</br>
+        =log(Y*Fe / X*Fe)_star - log(Y*Fe / X*Fe)_sun</br>
+        =log(Y/Fe)_star - log(Y/Fe)_sun - (log(X/Fe)_star - log(X/Fe)_sun)</br>
+        =[Y/Fe] - [X/Fe]</br>
+        [Y/X] = [Y/Fe] - [X/Fe]</p>
         <p>Welcome to our visualization data science project. We have decided to visualize the stellar chemical distribution throughout the Milky Way Galaxy. To do so, chemical abundance measurements from the Sloan Digital Sky Survey (SDSS) have been crossmatched with distance measurements from Gaia space craft and are displayed here to encourage exploration of the data.
 
 We wanted to start with something familiar to most science enthusiasts. In the upper left hand corner you see the periodic table which displays the atomic number and symbol. The color ratios overlaid each element indicate the percentage of contributions from a specific source, such as the big bang contributing to most of the Hydrogen and Helium we see today.
