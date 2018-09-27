@@ -27,6 +27,10 @@ var ScatterPlot = function () {
         this.svg.append("g").attr("id", "xAxis").attr("class", "axisWhite");
         this.svg.append("g").attr("id", "yAxis").attr("class", "axisWhite");
         this.svg.append("g").attr("id", "circs").attr("class", "axisWhite");
+        
+        var fontSize = this.svgWidth * 0.025;
+        this.svg.append("text").attr("id", "y_axis_label").attr("font-size", fontSize).attr("text-anchor", "left").attr("transform", "translate("+fontSize+", "+this.svgHeight/2+") rotate(-90)").attr("fill", "white").text("");
+        this.svg.append("text").attr("id", "x_axis_label").attr("font-size", fontSize).attr("text-anchor", "left").attr("transform", "translate("+this.svgWidth/2.5+", "+this.svgHeight*0.99+")").attr("fill", "white").text("");
     }
 
     _createClass(ScatterPlot, [{
@@ -36,16 +40,28 @@ var ScatterPlot = function () {
             // Plotting scatter plot
 
             //Axis
+            let ElementsList = ["Sr", "Y", "Zr", "Nb", "Pd", "Ag", "Hf", "Ir", "Eu", "Tb", "Tm"];
             let cbActive = document.getElementById("sp_checkbox").checked;
+            if( ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 )
+            {
+                if( cbActive ){ d3.select("#y_axis_label").text("Y-Axis: [" + ySelected + "/" + xSelected + "]"); }
+                else{ d3.select("#y_axis_label").text("Y-Axis: [" + ySelected + "/Fe]"); }
+                d3.select("#x_axis_label").text("Y-Axis: [" + xSelected + "/Fe]");
+            }
+            else
+            {
+                d3.select("#y_axis_label").text("");
+                d3.select("#x_axis_label").text("");
+            }
 
             function y_data(d)
             {
-                if( cbActive ){ return (parseFloat(d[ySelected]) - parseFloat(d[xSelected])); }
+                if( cbActive & ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 ){ return (parseFloat(d[ySelected]) - parseFloat(d[xSelected])); }
                 else { return parseFloat(d[ySelected]); }
             }
             
-            var xbuffer = 55.5;
-            var ybuffer = 20;
+            var xbuffer = this.svgWidth*0.0958;
+            var ybuffer = this.svgHeight*0.11;
             var pad = 0.1;
             var r = 2.5;
 
