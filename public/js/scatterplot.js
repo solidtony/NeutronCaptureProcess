@@ -44,17 +44,32 @@ var ScatterPlot = function () {
             let cbActive = document.getElementById("sp_checkbox").checked;
             if( ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 )
             {
-                if( cbActive ){ d3.select("#y_axis_label").text("Y-Axis: [" + ySelected + "/" + xSelected + "]"); }
-                else{ d3.select("#y_axis_label").text("Y-Axis: [" + ySelected + "/Fe]"); }
-                d3.select("#x_axis_label").text("Y-Axis: [" + xSelected + "/Fe]");
+                d3.select("#checkbox_label").text("Check to plot [Y-axis/X-axis] vs [Fe/H].")
+                if( cbActive )
+                { 
+                    d3.select("#y_axis_label").text("Y-Axis: [" + ySelected + "/" + xSelected + "]"); 
+                    d3.select("#x_axis_label").text("X-Axis: [Fe/H]");
+                }
+                else
+                {
+                    d3.select("#y_axis_label").text("Y-Axis: [" + ySelected + "/Fe]");
+                    d3.select("#x_axis_label").text("X-Axis: [" + xSelected + "/Fe]");
+                }
             }
             else
             {
+                d3.select("#checkbox_label").text("Deactivated: Select X=[A/Fe] and Y=[B/Fe] to activate check-box.")
                 d3.select("#y_axis_label").text("");
                 d3.select("#x_axis_label").text("");
             }
 
-            function y_data(d)
+            function x_max_min(d)
+            {
+                if( cbActive & ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 ){ return parseFloat(d.Fe); }
+                else { return parseFloat(d[xSelected]); }
+            }
+            
+            function y_max_min(d)
             {
                 if( cbActive & ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 ){ return (parseFloat(d[ySelected]) - parseFloat(d[xSelected])); }
                 else { return parseFloat(d[ySelected]); }
@@ -67,18 +82,16 @@ var ScatterPlot = function () {
 
             var d_time = 1000;
 
-            var xmax = d3.max(this.starData, function (d) {
-                return parseFloat(d[xSelected]);
-            });
-            var xmin = d3.min(this.starData, function (d) {
-                return parseFloat(d[xSelected]);
-            });
-            var ymax = d3.max(this.starData, y_data);
-            var ymin = d3.min(this.starData, y_data);
-            var cmax = d3.max(this.starData, function (d) {
+            var xmax = d3.max(this.starData, x_max_min);
+            var xmin = d3.min(this.starData, x_max_min);
+            var ymax = d3.max(this.starData, y_max_min);
+            var ymin = d3.min(this.starData, y_max_min);
+            var cmax = d3.max(this.starData, function (d)
+            {
                 return parseFloat(d[cSelected]);
             });
-            var cmin = d3.min(this.starData, function (d) {
+            var cmin = d3.min(this.starData, function (d)
+            {
                 return parseFloat(d[cSelected]);
             });
 
@@ -86,6 +99,7 @@ var ScatterPlot = function () {
             var xScale = d3.scaleLinear().domain([xmin, xmax]).range([r + xbuffer, this.svgWidth - r]);
             //Y scale
             var yScale = d3.scaleLinear().domain([ymax, ymin]).range([r, this.svgHeight - ybuffer - r]);
+            //Color scale
             var cScale = d3.scaleLinear().domain([cmin, cmax]).range(["#a21201", "#0ae4d3"]);
 
             //x-axis setup
@@ -97,25 +111,63 @@ var ScatterPlot = function () {
             d3.select("#yAxis").attr("transform", "translate(" + xbuffer + ", 0)").transition().duration(d_time).call(yAxis);
 
             //Plots data
+            function y_data(d)
+            {
+                if( isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected])) )
+                {
+                    return 0;
+                }
+                else
+                {
+                    if( cbActive & ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 )
+                    {
+                        if( isNaN(parseFloat(d.Fe)) ){ return 0; }
+                        else
+                        {
+                            return yScale( parseFloat(d[ySelected]) - parseFloat(d[xSelected]) );
+                        }
+                    }
+                    else
+                    {
+                        return yScale( parseFloat(d[ySelected]) );
+                    }
+                }
+            }
+            
+            function x_data(d)
+            {
+                if( isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected])) )
+                {
+                    return -2*r;
+                }
+                else
+                {
+                    if( cbActive & ElementsList.indexOf(ySelected) > -1 & ElementsList.indexOf(xSelected) > -1 )
+                    {
+                        if( isNaN(parseFloat(d.Fe)) ){ return -2*r; }
+                        else
+                        {
+                            return xScale( parseFloat(d.Fe) );
+                        }
+                    }
+                    else
+                    {
+                        return xScale( parseFloat(d[xSelected]) );
+                    }
+                }
+            }
+            
             var circs = d3.select("#circs").selectAll("circle").data(this.starData);
 
             var circsNew = circs.enter().append("circle");
             circs.exit().remove;
             circs = circsNew.merge(circs);
 
-            circs.transition().duration(d_time).attr("cx", function (d) {
-                if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
-                    return -2*r;
-                } else {
-                    return xScale(parseFloat(d[xSelected]));
-                }
-            }).attr("cy", function (d) {
-                if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
-                    return 0;
-                } else {
-                    return yScale(y_data(d));
-                }
-            }).attr("r", r).style("fill", function (d) {
+            circs.transition().duration(d_time)
+            .attr("cx", x_data )
+            .attr("cy", y_data )
+            .attr("r", r)
+            .style("fill", function (d) {
                 if (isNaN(parseFloat(d[xSelected])) | isNaN(parseFloat(d[ySelected])) | isNaN(parseFloat(d[cSelected]))) {
                     return "black";
                 } else {
@@ -137,7 +189,7 @@ var ScatterPlot = function () {
                     dy = s[1][1] - y0;
 
                 self.svg.selectAll('circle').classed("unselected", function (d) {
-                    if (xScale(parseFloat(d[xSelected])) >= x0 && xScale(parseFloat(d[xSelected])) <= x0 + dx && yScale(y_data(d)) >= y0 && yScale(parseFloat(y_data(d))) <= y0 + dy) {
+                    if (x_data(d) >= x0 && x_data(d) <= x0 + dx && y_data(d) >= y0 && y_data(d) <= y0 + dy) {
                         return false;
                     } else {
                         return true;
@@ -145,7 +197,7 @@ var ScatterPlot = function () {
                 });
 
                 d3.select("#GPlot").selectAll('circle').classed("unselected", function (d) {
-                    if (xScale(parseFloat(d[xSelected])) >= x0 && xScale(parseFloat(d[xSelected])) <= x0 + dx && yScale(parseFloat(y_data(d))) >= y0 && yScale(parseFloat(y_data(d))) <= y0 + dy) {
+                    if (x_data(d) >= x0 && x_data(d) <= x0 + dx && y_data(d) >= y0 && y_data(d) <= y0 + dy) {
                         return false;
                     } else {
                         return true;

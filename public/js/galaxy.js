@@ -164,7 +164,6 @@ var Galaxy = function () {
 
                 this.svg.selectAll("circle").transition().duration(1000).attr("r", function (d) {
                     var Radius = 3.5;
-                    //let Radius = galaxyScale(d.logg*100);
                     if (isNaN(parseFloat(d[selection.symbol])) | isNaN(parseFloat(d.Coord_X)) | isNaN(parseFloat(d.Coord_Y))) {
                         Radius = 0.0;
                     }
